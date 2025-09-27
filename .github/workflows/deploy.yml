@@ -22,12 +22,46 @@ jobs:
       - name: Install Dependencies
         run: npm install react react-dom
 
-      - name: Create index.html and Copy Files
-        # *** FIX APPLIED: Added the inline rendering script after loading index.jsx ***
+      - name: Create index.html with Embedded React Code
+        # This step uses 'cat' to read the index.jsx content and inject it into the final HTML template.
         run: |
           mkdir -p build
-          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><!-- Load Tailwind --><script src='https://cdn.tailwindcss.com'></script><!-- Load React & ReactDOM Globally --><script crossorigin src='https://unpkg.com/react@18/umd/react.development.js'></script><script crossorigin src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'></script><!-- Load Babel Standalone to process JSX --><script src='https://unpkg.com/@babel/standalone/babel.min.js'></script></head><body><div id='root'></div><!-- Load the JSX file and tell Babel to process it --><script type='text/babel' src='./index.jsx'></script><!-- FINALLY, RENDER THE APP COMPONENT --><script type='text/babel'>const container = document.getElementById('root');const root = ReactDOM.createRoot(container);root.render(React.createElement(App));</script></body></html>" > build/index.html
-          cp index.jsx build/index.jsx
+          # Read JSX content into a variable
+          JSX_CONTENT=$(cat index.jsx)
+          
+          # Create the final HTML template, embedding the JSX_CONTENT within the script tag.
+          # We add the final rendering call (root.render...) to the end of the content.
+          HTML_TEMPLATE=$(cat <<EOF
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Fanuel Debebe Portfolio</title>
+    <!-- Load Tailwind -->
+    <script src='https://cdn.tailwindcss.com'></script>
+    <!-- Load React & ReactDOM Globally -->
+    <script crossorigin src='https://unpkg.com/react@18/umd/react.development.js'></script>
+    <script crossorigin src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'></script>
+    <!-- Load Babel Standalone to process JSX -->
+    <script src='https://unpkg.com/@babel/standalone/babel.min.js'></script>
+</head>
+<body>
+    <div id='root'></div>
+    <!-- EMBEDDED REACT CODE -->
+    <script type='text/babel'>
+        ${JSX_CONTENT}
+        
+        // FINAL RENDER CALL (Must be executed after component definition)
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>
+EOF
+)
+          echo "$HTML_TEMPLATE" > build/index.html
           cp profile.jpg build/profile.jpg
 
       - name: Deploy to GitHub Pages
@@ -36,3 +70,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
           publish_branch: gh-pages
+
+
+### Final Action Plan
+
+1.  **Edit and Overwrite:** Go to **`.github/workflows/deploy.yml`** and **overwrite the entire content** with the code above.
+2.  **Commit:** Commit the change (e.g., "Critical Fix: Embedded JSX inline for guaranteed rendering").
+
+This will trigger the Action one last time. Once it turns **green**, please refresh your portfolio URL. This strategy is the industrial-strength approach for this exact scenario and should deliver the beautiful portfolio you were promised!
