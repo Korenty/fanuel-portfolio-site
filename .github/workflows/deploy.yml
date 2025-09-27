@@ -1,0 +1,39 @@
+name: Build and Deploy React App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        # Install basic dependencies needed for the build environment
+        run: npm install react react-dom
+
+      - name: Create index.html and Copy Files
+        # This simulates the build process by creating a standard index.html 
+        # that loads our single index.jsx component and the necessary CDNs.
+        run: |
+          mkdir -p build
+          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><script src='https://cdn.tailwindcss.com'></script></head><body><div id='root'></div><script type='module'>import React from 'https://cdn.skypack.dev/react';import ReactDOM from 'https://cdn.skypack.dev/react-dom';import App from '../index.jsx';const root = ReactDOM.createRoot(document.getElementById('root'));root.render(<App />);</script></body></html>" > build/index.html
+          cp index.jsx build/index.jsx
+          cp profile.jpg build/profile.jpg
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
