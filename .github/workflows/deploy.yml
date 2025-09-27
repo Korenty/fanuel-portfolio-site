@@ -1,3 +1,4 @@
+
 name: Build and Deploy React App
 
 on:
@@ -20,15 +21,46 @@ jobs:
           node-version: '18'
 
       - name: Install Dependencies
-        run: npm install react react-dom
+        # This now uses the new package.json file
+        run: npm install
 
-      - name: Create index.html and Copy Files
-        # *** FIX APPLIED: Added the inline rendering script after loading index.jsx ***
+      - name: Create index.html with Embedded React Code
+        # This uses simple 'echo' commands and 'cat' to sequentially build the file.
         run: |
           mkdir -p build
-          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><!-- Load Tailwind --><script src='https://cdn.tailwindcss.com'></script><!-- Load React & ReactDOM Globally --><script crossorigin src='https://unpkg.com/react@18/umd/react.development.js'></script><script crossorigin src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'></script><!-- Load Babel Standalone to process JSX --><script src='https://unpkg.com/@babel/standalone/babel.min.js'></script></head><body><div id='root'></div><!-- Load the JSX file and tell Babel to process it --><script type='text/babel' src='./index.jsx'></script><!-- FINALLY, RENDER THE APP COMPONENT --><script type='text/babel'>const container = document.getElementById('root');const root = ReactDOM.createRoot(container);root.render(React.createElement(App));</script></body></html>" > build/index.html
-          cp index.jsx build/index.jsx
+          
+          # 1. Start HTML structure
+          echo "<!DOCTYPE html>" > build/index.html
+          echo "<html lang='en'>" >> build/index.html
+          echo "<head>" >> build/index.html
+          echo "    <meta charset='UTF-8'>" >> build/index.html
+          echo "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" >> build/index.html
+          echo "    <title>Fanuel Debebe Portfolio</title>" >> build/index.html
+          echo "    <script src='https://cdn.tailwindcss.com'></script>" >> build/index.html
+          echo "    <script crossorigin src='https://unpkg.com/react@18/umd/react.development.js'></script>" >> build/index.html
+          echo "    <script crossorigin src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'></script>" >> build/index.html
+          echo "    <script src='https://unpkg.com/@babel/standalone/babel.min.js'></script>" >> build/index.html
+          echo "</head>" >> build/index.html
+          echo "<body>" >> build/index.html
+          echo "    <div id='root'></div>" >> build/index.html
+          echo "    <!-- EMBEDDED REACT CODE -->" >> build/index.html
+          echo "    <script type='text/babel'>" >> build/index.html
+          
+          # 2. Append the contents of index.jsx (the component code)
+          cat index.jsx >> build/index.html
+          
+          # 3. Append the final rendering script and close tags
+          echo "        // FINAL RENDER CALL" >> build/index.html
+          echo "        const container = document.getElementById('root');" >> build/index.html
+          echo "        const root = ReactDOM.createRoot(container);" >> build/index.html
+          echo "        root.render(React.createElement(App));" >> build/index.html
+          echo "    </script>" >> build/index.html
+          echo "</body>" >> build/index.html
+          echo "</html>" >> build/index.html
+          
+          # Copy other necessary files, including the anti-Jekyll file
           cp profile.jpg build/profile.jpg
+          cp .nojekyll build/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
