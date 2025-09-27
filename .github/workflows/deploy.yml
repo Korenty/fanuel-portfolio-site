@@ -23,10 +23,10 @@ jobs:
         run: npm install react react-dom
 
       - name: Create index.html and Copy Files
-        # *** FIX APPLIED HERE: Changed 'import App from "../index.jsx"' to 'import App from "./index.jsx"' ***
+        # *** FIX APPLIED HERE: Switched to Babel Standalone and Global React/ReactDOM loading for stability ***
         run: |
           mkdir -p build
-          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><script src='https://cdn.tailwindcss.com'></script></head><body><div id='root'></div><script type='module'>import React from 'https://cdn.skypack.dev/react';import ReactDOM from 'https://cdn.skypack.dev/react-dom';import App from './index.jsx';const root = ReactDOM.createRoot(document.getElementById('root'));root.render(<App />);</script></body></html>" > build/index.html
+          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><!-- Load Tailwind --><script src='https://cdn.tailwindcss.com'></script><!-- Load React & ReactDOM Globally --><script crossorigin src='https://unpkg.com/react@18/umd/react.development.js'></script><script crossorigin src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'></script><!-- Load Babel Standalone to process JSX --><script src='https://unpkg.com/@babel/standalone/babel.min.js'></script></head><body><div id='root'></div><!-- Load the JSX file and tell Babel to process it --><script type='text/babel' src='./index.jsx'></script></body></html>" > build/index.html
           cp index.jsx build/index.jsx
           cp profile.jpg build/profile.jpg
 
