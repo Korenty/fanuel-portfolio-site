@@ -20,15 +20,13 @@ jobs:
           node-version: '18'
 
       - name: Install Dependencies
-        # Install basic dependencies needed for the build environment
         run: npm install react react-dom
 
       - name: Create index.html and Copy Files
-        # This simulates the build process by creating a standard index.html 
-        # that loads our single index.jsx component and the necessary CDNs.
+        # *** FIX APPLIED HERE: Changed 'import App from "../index.jsx"' to 'import App from "./index.jsx"' ***
         run: |
           mkdir -p build
-          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><script src='https://cdn.tailwindcss.com'></script></head><body><div id='root'></div><script type='module'>import React from 'https://cdn.skypack.dev/react';import ReactDOM from 'https://cdn.skypack.dev/react-dom';import App from '../index.jsx';const root = ReactDOM.createRoot(document.getElementById('root'));root.render(<App />);</script></body></html>" > build/index.html
+          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Fanuel Debebe Portfolio</title><script src='https://cdn.tailwindcss.com'></script></head><body><div id='root'></div><script type='module'>import React from 'https://cdn.skypack.dev/react';import ReactDOM from 'https://cdn.skypack.dev/react-dom';import App from './index.jsx';const root = ReactDOM.createRoot(document.getElementById('root'));root.render(<App />);</script></body></html>" > build/index.html
           cp index.jsx build/index.jsx
           cp profile.jpg build/profile.jpg
 
@@ -37,5 +35,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
-          publish_branch: gh-pages # <-- THIS IS THE CRITICAL FIX
-
+          publish_branch: gh-pages
